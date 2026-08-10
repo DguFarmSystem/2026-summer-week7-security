@@ -127,8 +127,11 @@ def logout():
 
 if __name__ == "__main__":
     init_db()
-    # Werkzeug 자동 재시작 때문에 프로세스가 두 번 실행되는데, 실제로 서버를 붙잡는
-    # 쪽(WERKZEUG_RUN_MAIN=true)에서만 브라우저를 열어야 탭이 한 번만 뜬다.
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    # run_all.command 처럼 여러 서버를 한 스크립트에서 켤 때는 NO_RELOADER=1을 심어
+    # Werkzeug 자동 재시작(프로세스가 두 개로 늘어나는 것)을 꺼서 PID 하나로 종료하기
+    # 쉽게 만든다. 개별 run.command로 켤 때는 그대로 자동 재시작이 켜져 있어서
+    # SECURE_MODE를 고치고 저장하면 바로 반영된다.
+    use_reloader = os.environ.get("NO_RELOADER") != "1"
+    if not use_reloader or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         threading.Timer(1.0, lambda: webbrowser.open(f"http://127.0.0.1:{PORT}")).start()
-    app.run(debug=True, port=PORT)
+    app.run(debug=True, use_reloader=use_reloader, port=PORT)

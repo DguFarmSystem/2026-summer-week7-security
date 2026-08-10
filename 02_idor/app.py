@@ -167,6 +167,7 @@ def logout():
 
 if __name__ == "__main__":
     init_db()
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    use_reloader = os.environ.get("NO_RELOADER") != "1"
+    if not use_reloader or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         threading.Timer(1.0, lambda: webbrowser.open(f"http://127.0.0.1:{PORT}")).start()
-    app.run(debug=True, port=PORT)
+    app.run(debug=True, use_reloader=use_reloader, port=PORT)
